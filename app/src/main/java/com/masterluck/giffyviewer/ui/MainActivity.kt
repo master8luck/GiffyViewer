@@ -1,7 +1,8 @@
-package com.masterluck.giffyviewer
+package com.masterluck.giffyviewer.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.masterluck.giffyviewer.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
