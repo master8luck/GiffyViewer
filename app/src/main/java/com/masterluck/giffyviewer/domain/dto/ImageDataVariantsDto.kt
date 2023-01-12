@@ -1,4 +1,4 @@
-package com.masterluck.giffyviewer.data.dto
+package com.masterluck.giffyviewer.domain.dto
 
 data class ImageDataVariantsDto(
     val original: ImageDataDto,
