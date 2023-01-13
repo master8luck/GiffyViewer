@@ -3,8 +3,9 @@ package com.masterluck.giffyviewer.di
 import android.content.Context
 import androidx.room.Room
 import com.masterluck.giffyviewer.Utils
+import com.masterluck.giffyviewer.data.database.GifDAO
 import com.masterluck.giffyviewer.data.database.GiffyViewerDatabase
-import com.masterluck.giffyviewer.repository.GifAPI
+import com.masterluck.giffyviewer.domain.GifAPI
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,5 +52,9 @@ object DataModule {
     fun provideDatabase(@ApplicationContext context: Context): GiffyViewerDatabase =
         Room.databaseBuilder(context, GiffyViewerDatabase::class.java, "GiffyViewerDatabase")
             .allowMainThreadQueries().build()
+
+    @Provides
+    @Singleton
+    fun provideGifDAO(database: GiffyViewerDatabase): GifDAO = database.gifDao()
 
 }

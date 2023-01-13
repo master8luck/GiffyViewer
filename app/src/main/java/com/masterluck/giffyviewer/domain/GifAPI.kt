@@ -1,4 +1,4 @@
-package com.masterluck.giffyviewer.repository
+package com.masterluck.giffyviewer.domain
 
 import com.masterluck.giffyviewer.domain.dto.ResponseDto
 import io.reactivex.rxjava3.core.Single

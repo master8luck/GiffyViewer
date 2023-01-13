@@ -8,7 +8,11 @@ import com.masterluck.giffyviewer.R
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.databinding.ItemGifListBinding
 
-class GifListAdapter(private var gifList: List<GifData>) : RecyclerView.Adapter<GifListAdapter.GifListViewHolder>() {
+class GifListAdapter(
+    private var gifList: List<GifData>,
+    private var onRemoveClicked: (gifData: GifData) -> Unit,
+    private var onGifClicked: (id: String) -> Unit,
+) : RecyclerView.Adapter<GifListAdapter.GifListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifListViewHolder {
         val binding = ItemGifListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -16,11 +20,20 @@ class GifListAdapter(private var gifList: List<GifData>) : RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: GifListViewHolder, position: Int) {
+
         Glide.with(holder.itemView.context)
-            .load(gifList[position].downsized)
+            .load(gifList[position].downsizedUrl)
             .override(480)
             .placeholder(R.drawable.ic_launcher_background)
             .into(holder.binding.ivGif)
+
+        holder.binding.ivClose.setOnClickListener {
+            onRemoveClicked(gifList[position])
+        }
+
+        holder.binding.ivGif.setOnClickListener {
+            onGifClicked(gifList[position].id)
+        }
 
     }
 

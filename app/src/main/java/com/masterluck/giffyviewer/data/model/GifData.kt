@@ -9,7 +9,9 @@ data class GifData (
     @PrimaryKey
     val id: String,
 
-    val original: String,
-    val downsized: String,
+    val title: String,
+    val originalUrl: String,
+    val downsizedUrl: String,
     var isRemoved: Boolean = false,
-)
+
+    )

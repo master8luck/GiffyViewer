@@ -1,7 +1,6 @@
 package com.masterluck.giffyviewer.ui.giflist
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.repository.GiffyViewerRepository
@@ -14,7 +13,11 @@ class GifListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val mGifListLiveData = repository.getGifs()
-    val gifListLiveData = mGifListLiveData as LiveData<List<GifData>>
+    val gifListLiveData = mGifListLiveData
+
+    fun removeGif(gifData: GifData) {
+        repository.removeGif(gifData)
+    }
 
 
 }

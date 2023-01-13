@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.masterluck.giffyviewer.Utils
 import com.masterluck.giffyviewer.databinding.FragmentGifListBinding
@@ -30,7 +31,7 @@ class GifListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = GifListAdapter(listOf())
+        val adapter = GifListAdapter(listOf(), viewModel::removeGif, this::onGifClicked)
         binding.rvGifList.adapter = adapter
         binding.rvGifList.layoutManager = GridLayoutManager(context, countColumnsNumber())
 
@@ -38,6 +39,12 @@ class GifListFragment : Fragment() {
             adapter.setupGifs(gifList)
         }
 
+    }
+
+    private fun onGifClicked(id: String) {
+        findNavController().navigate(
+            GifListFragmentDirections.actionGifListFragmentToGifFragment(id)
+        )
     }
 
     private fun countColumnsNumber(): Int {
