@@ -17,22 +17,38 @@ class GiffyViewerRepository @Inject constructor(
     private val gifDAO: GifDAO,
 ) {
 
-    fun getGifs(): LiveData<List<GifData>> {
-        gifAPI.getGifList()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe ({
-            val gifDataList = mutableListOf<GifData>()
-            for (gifDataDto in it.data) {
-                gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
-            }
+    fun getGifs(query: String = "", offset: Int = 0): LiveData<List<GifData>> {
+        if (query.isNullOrEmpty()) {
+            gifAPI.getTrendingGifs(offset)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    val gifDataList = mutableListOf<GifData>()
+                    for (gifDataDto in it.data) {
+                        gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
+                    }
 
-            gifDAO.insertGifs(gifDataList)
-        }, {
+                    gifDAO.insertGifs(gifDataList)
+                }, {
 
-        })
+                })
+        } else {
+            gifAPI.searchGifs(query, offset)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    val gifDataList = mutableListOf<GifData>()
+                    for (gifDataDto in it.data) {
+                        gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
+                    }
 
-        return gifDAO.getGifs()
+                    gifDAO.insertGifs(gifDataList)
+                }, {
+
+                })
+        }
+
+        return gifDAO.getGifs(query, offset)
     }
 
     fun removeGif(gifData: GifData) {

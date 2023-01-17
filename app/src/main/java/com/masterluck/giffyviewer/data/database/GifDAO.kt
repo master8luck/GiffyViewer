@@ -8,8 +8,8 @@ import io.reactivex.rxjava3.core.Single
 @Dao
 interface GifDAO {
 
-    @Query("SELECT * FROM GifData WHERE isRemoved=0")
-    fun getGifs(): LiveData<List<GifData>>
+    @Query("SELECT * FROM GifData WHERE isRemoved=0 AND title LIKE '%' || :query || '%' LIMIT 20 OFFSET :offset")
+    fun getGifs(query: String, offset: Int): LiveData<List<GifData>>
 
     @Query("SELECT * FROM GifData WHERE id=:id LIMIT 1")
     fun getGif(id: String): Single<GifData>
