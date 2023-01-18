@@ -11,7 +11,7 @@ import com.masterluck.giffyviewer.databinding.ItemGifListBinding
 class GifListAdapter(
     private var gifList: List<GifData>,
     private var onRemoveClicked: (gifData: GifData) -> Unit,
-    private var onGifClicked: (id: String) -> Unit,
+    private var onGifClicked: (position: Int) -> Unit,
 ) : RecyclerView.Adapter<GifListAdapter.GifListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifListViewHolder {
@@ -32,7 +32,7 @@ class GifListAdapter(
         }
 
         holder.binding.ivGif.setOnClickListener {
-            onGifClicked(gifList[position].id)
+            onGifClicked(position)
         }
 
     }

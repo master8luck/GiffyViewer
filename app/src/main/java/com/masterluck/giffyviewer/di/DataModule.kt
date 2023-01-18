@@ -2,7 +2,7 @@ package com.masterluck.giffyviewer.di
 
 import android.content.Context
 import androidx.room.Room
-import com.masterluck.giffyviewer.Utils
+import com.masterluck.giffyviewer.utils.Utils
 import com.masterluck.giffyviewer.data.database.GifDAO
 import com.masterluck.giffyviewer.data.database.GiffyViewerDatabase
 import com.masterluck.giffyviewer.domain.GifAPI

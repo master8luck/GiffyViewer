@@ -1,4 +1,4 @@
-package com.masterluck.giffyviewer
+package com.masterluck.giffyviewer.utils
 
 import android.content.Context
 import android.view.View

@@ -1,4 +1,4 @@
-package com.masterluck.giffyviewer.mapper
+package com.masterluck.giffyviewer.domain.mapper
 
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.domain.dto.GifDataDto

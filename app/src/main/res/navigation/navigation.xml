@@ -18,9 +18,5 @@
         android:id="@+id/gifFragment"
         android:name="com.masterluck.giffyviewer.ui.gif.GifFragment"
         android:label="fragment_gif"
-        tools:layout="@layout/fragment_gif" >
-        <argument
-            android:name="id"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/fragment_gif" />
 </navigation>

@@ -8,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.masterluck.giffyviewer.Extensions.hideKeyboard
-import com.masterluck.giffyviewer.Utils
+import com.masterluck.giffyviewer.utils.Extensions.hideKeyboard
+import com.masterluck.giffyviewer.utils.Utils
 import com.masterluck.giffyviewer.databinding.FragmentGifListBinding
+import com.masterluck.giffyviewer.ui.viewmodel.GifsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.floor
 
@@ -21,7 +23,7 @@ import kotlin.math.floor
 class GifListFragment : Fragment() {
 
     private lateinit var binding: FragmentGifListBinding
-    private val viewModel: GifListViewModel by viewModels()
+    private val viewModel: GifsViewModel by activityViewModels()
 
     private lateinit var adapter: GifListAdapter
 
@@ -38,18 +40,30 @@ class GifListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.run {
-            adapter = GifListAdapter(listOf(), viewModel::removeGif, this@GifListFragment::onGifClicked)
+
+            adapter =
+                GifListAdapter(listOf(), viewModel::removeGif, this@GifListFragment::onGifClicked)
             rvGifList.adapter = adapter
             rvGifList.layoutManager = GridLayoutManager(context, countColumnsNumber())
 
-            viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList ->
-                adapter.setupGifs(gifList)
+            ivBack.setOnClickListener {
+                showOtherPage(
+                    PageLoadingOrder.PREVIOUS,
+                    tilEt.text.toString()
+                )
             }
-
-            ivBack.setOnClickListener { showOtherPage(PageLoadingOrder.PREVIOUS, tilEt.text.toString()) }
-            ivForward.setOnClickListener { showOtherPage(PageLoadingOrder.NEXT, tilEt.text.toString()) }
-
-            til.setEndIconOnClickListener { showOtherPage(PageLoadingOrder.NEW, tilEt.text.toString()) }
+            ivForward.setOnClickListener {
+                showOtherPage(
+                    PageLoadingOrder.NEXT,
+                    tilEt.text.toString()
+                )
+            }
+            til.setEndIconOnClickListener {
+                showOtherPage(
+                    PageLoadingOrder.NEW,
+                    tilEt.text.toString()
+                )
+            }
 
             // Hiding keyboard when search field not in focus
             root.setOnClickListener { context?.hideKeyboard(it) }
@@ -57,30 +71,41 @@ class GifListFragment : Fragment() {
                 context?.hideKeyboard(view)
                 false
             }
+
         }
 
     }
 
-    private fun showOtherPage(order: PageLoadingOrder, query: String) {
-        viewModel.gifListLiveData.removeObservers(viewLifecycleOwner)
-        viewModel.showOtherPage(order, query)
+    override fun onResume() {
+        super.onResume()
         viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList ->
             adapter.setupGifs(gifList)
         }
-        adapter.notifyDataSetChanged()
+        binding.ivBack.isVisible = viewModel.offset > 0
+        binding.rvGifList.scrollToPosition(viewModel.selectedGifPosition)
+    }
+
+    private fun showOtherPage(order: PageLoadingOrder, query: String) {
+        context?.hideKeyboard(binding.tilEt)
+        viewModel.gifListLiveData.removeObservers(viewLifecycleOwner)
+        viewModel.showOtherPage(order, query)
+        viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList -> adapter.setupGifs(gifList) }
         binding.ivBack.isVisible = viewModel.offset > 0
     }
 
 
-    private fun onGifClicked(id: String) {
+    private fun onGifClicked(position: Int) {
+        viewModel.selectedGifPosition = position
         findNavController().navigate(
-            GifListFragmentDirections.actionGifListFragmentToGifFragment(id)
+            GifListFragmentDirections.actionGifListFragmentToGifFragment()
         )
     }
 
+    /**
+    Warning hardcoded gif item max width
+    Adapted for different screen sizes
+     */
     private fun countColumnsNumber(): Int {
-        // Warning hardcoded gif item max width
-        // Adapted for different screen sizes
         val display = requireActivity().windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)

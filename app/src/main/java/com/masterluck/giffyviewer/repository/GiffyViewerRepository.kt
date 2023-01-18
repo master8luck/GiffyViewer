@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import com.masterluck.giffyviewer.data.database.GifDAO
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.domain.GifAPI
-import com.masterluck.giffyviewer.mapper.GifDtoToGifDAOMapper
+import com.masterluck.giffyviewer.domain.mapper.GifDtoToGifDAOMapper
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers

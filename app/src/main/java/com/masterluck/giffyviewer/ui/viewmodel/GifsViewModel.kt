@@ -1,17 +1,16 @@
-package com.masterluck.giffyviewer.ui.giflist
+package com.masterluck.giffyviewer.ui.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.masterluck.giffyviewer.Utils
+import com.masterluck.giffyviewer.utils.Utils
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.repository.GiffyViewerRepository
+import com.masterluck.giffyviewer.ui.giflist.PageLoadingOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
-import retrofit2.http.Query
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @HiltViewModel
-class GifListViewModel @Inject constructor(
+class GifsViewModel @Inject constructor(
     private val repository: GiffyViewerRepository,
 ) : ViewModel() {
 
@@ -22,12 +21,13 @@ class GifListViewModel @Inject constructor(
         private set
 
     private var lastQuery = ""
+    var selectedGifPosition = 0
 
     fun removeGif(gifData: GifData) {
         repository.removeGif(gifData)
     }
 
-    fun showOtherPage(isNext: PageLoadingOrder, query: String) {
+    fun showOtherPage(isNext: PageLoadingOrder, query: String = lastQuery) {
         if (lastQuery == query) {
             when (isNext) {
                 PageLoadingOrder.PREVIOUS -> offset -= Utils.pageSize
