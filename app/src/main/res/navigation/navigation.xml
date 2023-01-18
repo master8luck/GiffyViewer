@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/gifListFragment"
         android:name="com.masterluck.giffyviewer.ui.giflist.GifListFragment"
-        android:label="fragment_gif_list"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_gif_list" >
         <action
             android:id="@+id/action_gifListFragment_to_gifFragment"
@@ -17,6 +17,6 @@
     <fragment
         android:id="@+id/gifFragment"
         android:name="com.masterluck.giffyviewer.ui.gif.GifFragment"
-        android:label="fragment_gif"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_gif" />
 </navigation>

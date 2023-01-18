@@ -18,46 +18,55 @@ class GiffyViewerRepository @Inject constructor(
     private val gifDAO: GifDAO,
 ) {
 
+    //TODO refactor code to post <List<GifData>> instead of returning LiveData<List<GifData>>
     private val mIsLoadingState = MutableLiveData<Boolean>()
     val isLoadingState = mIsLoadingState as LiveData<Boolean>
 
     fun getGifs(query: String = "", offset: Int = 0): LiveData<List<GifData>> {
         mIsLoadingState.postValue(true)
         if (query.isNullOrEmpty()) {
-            gifAPI.getTrendingGifs(offset)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-
-                    mIsLoadingState.postValue(false)
-                    val gifDataList = mutableListOf<GifData>()
-                    for (gifDataDto in it.data) {
-                        gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
-                    }
-                    gifDAO.insertGifs(gifDataList)
-
-                }, {
-                    mIsLoadingState.postValue(false)
-                })
+            getTrendingGifs(offset)
         } else {
-            gifAPI.searchGifs(query, offset)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-
-                    mIsLoadingState.postValue(false)
-                    val gifDataList = mutableListOf<GifData>()
-                    for (gifDataDto in it.data) {
-                        gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
-                    }
-                    gifDAO.insertGifs(gifDataList)
-
-                }, {
-                    mIsLoadingState.postValue(false)
-                })
+            searchGifs(query, offset)
         }
 
         return gifDAO.getGifs(query, offset)
+    }
+
+    private fun searchGifs(query: String, offset: Int) {
+        gifAPI.searchGifs(query, offset)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+
+                mIsLoadingState.postValue(false)
+                val gifDataList = mutableListOf<GifData>()
+                for (gifDataDto in it.data) {
+                    gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
+                }
+                gifDAO.insertGifs(gifDataList)
+
+            }, {
+                mIsLoadingState.postValue(false)
+            })
+    }
+
+    private fun getTrendingGifs(offset: Int) {
+        gifAPI.getTrendingGifs(offset)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+
+                mIsLoadingState.postValue(false)
+                val gifDataList = mutableListOf<GifData>()
+                for (gifDataDto in it.data) {
+                    gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
+                }
+                gifDAO.insertGifs(gifDataList)
+
+            }, {
+                mIsLoadingState.postValue(false)
+            })
     }
 
     fun removeGif(gifData: GifData) {
