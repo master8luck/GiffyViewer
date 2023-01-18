@@ -7,9 +7,10 @@ import com.bumptech.glide.Glide
 import com.masterluck.giffyviewer.R
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.databinding.ItemGifListBinding
+import com.masterluck.giffyviewer.utils.Utils
 
 class GifListAdapter(
-    private var gifList: List<GifData>,
+    var gifList: List<GifData>,
     private var onRemoveClicked: (gifData: GifData) -> Unit,
     private var onGifClicked: (position: Int) -> Unit,
 ) : RecyclerView.Adapter<GifListAdapter.GifListViewHolder>() {
@@ -23,8 +24,7 @@ class GifListAdapter(
 
         Glide.with(holder.itemView.context)
             .load(gifList[position].downsizedUrl)
-            .override(480)
-            .placeholder(R.drawable.ic_launcher_background)
+            .placeholder(Utils.gifPlaceholder)
             .into(holder.binding.ivGif)
 
         holder.binding.ivClose.setOnClickListener {

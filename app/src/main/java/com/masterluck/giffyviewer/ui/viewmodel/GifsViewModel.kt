@@ -19,6 +19,7 @@ class GifsViewModel @Inject constructor(
 
     var offset = 0
         private set
+    val loadingState = repository.isLoadingState
 
     private var lastQuery = ""
     var selectedGifPosition = 0

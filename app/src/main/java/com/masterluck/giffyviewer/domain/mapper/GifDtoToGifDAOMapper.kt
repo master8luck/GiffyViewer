@@ -9,7 +9,7 @@ object GifDtoToGifDAOMapper {
             gifDto.id,
             gifDto.title,
             gifDto.images.original.url,
-            gifDto.images.downsized.url,
+            gifDto.images.downsized?.url ?: gifDto.images.original.url,
         )
     }
 }

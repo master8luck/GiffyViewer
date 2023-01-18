@@ -1,6 +1,7 @@
 package com.masterluck.giffyviewer.repository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.masterluck.giffyviewer.data.database.GifDAO
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.domain.GifAPI
@@ -17,34 +18,42 @@ class GiffyViewerRepository @Inject constructor(
     private val gifDAO: GifDAO,
 ) {
 
+    private val mIsLoadingState = MutableLiveData<Boolean>()
+    val isLoadingState = mIsLoadingState as LiveData<Boolean>
+
     fun getGifs(query: String = "", offset: Int = 0): LiveData<List<GifData>> {
+        mIsLoadingState.postValue(true)
         if (query.isNullOrEmpty()) {
             gifAPI.getTrendingGifs(offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+
+                    mIsLoadingState.postValue(false)
                     val gifDataList = mutableListOf<GifData>()
                     for (gifDataDto in it.data) {
                         gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
                     }
-
                     gifDAO.insertGifs(gifDataList)
-                }, {
 
+                }, {
+                    mIsLoadingState.postValue(false)
                 })
         } else {
             gifAPI.searchGifs(query, offset)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+
+                    mIsLoadingState.postValue(false)
                     val gifDataList = mutableListOf<GifData>()
                     for (gifDataDto in it.data) {
                         gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
                     }
-
                     gifDAO.insertGifs(gifDataList)
-                }, {
 
+                }, {
+                    mIsLoadingState.postValue(false)
                 })
         }
 
