@@ -3,9 +3,12 @@ package com.masterluck.giffyviewer.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.masterluck.giffyviewer.data.database.GifDAO
+import com.masterluck.giffyviewer.data.database.GiffyViewerDatabase
 import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.domain.GifAPI
+import com.masterluck.giffyviewer.domain.dto.ResponseDto
 import com.masterluck.giffyviewer.domain.mapper.GifDtoToGifDAOMapper
+import com.masterluck.giffyviewer.ui.viewmodel.GifsResponseState
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -16,21 +19,19 @@ import javax.inject.Singleton
 class GiffyViewerRepository @Inject constructor(
     private val gifAPI: GifAPI,
     private val gifDAO: GifDAO,
+    private val database: GiffyViewerDatabase,
 ) {
 
-    //TODO refactor code to post <List<GifData>> instead of returning LiveData<List<GifData>>
-    private val mIsLoadingState = MutableLiveData<Boolean>()
-    val isLoadingState = mIsLoadingState as LiveData<Boolean>
+    private val mResponseState = MutableLiveData<GifsResponseState>()
+    val responseState = mResponseState as LiveData<GifsResponseState>
 
-    fun getGifs(query: String = "", offset: Int = 0): LiveData<List<GifData>> {
-        mIsLoadingState.postValue(true)
-        if (query.isNullOrEmpty()) {
+    fun getGifs(query: String = "", offset: Int = 0) {
+        mResponseState.postValue(GifsResponseState.LoadingResponse)
+        if (query.isEmpty()) {
             getTrendingGifs(offset)
         } else {
             searchGifs(query, offset)
         }
-
-        return gifDAO.getGifs(query, offset)
     }
 
     private fun searchGifs(query: String, offset: Int) {
@@ -38,16 +39,9 @@ class GiffyViewerRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-
-                mIsLoadingState.postValue(false)
-                val gifDataList = mutableListOf<GifData>()
-                for (gifDataDto in it.data) {
-                    gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
-                }
-                gifDAO.insertGifs(gifDataList)
-
+                postWebGifs(it)
             }, {
-                mIsLoadingState.postValue(false)
+                postCachedGifs(query, offset, it)
             })
     }
 
@@ -56,26 +50,45 @@ class GiffyViewerRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-
-                mIsLoadingState.postValue(false)
-                val gifDataList = mutableListOf<GifData>()
-                for (gifDataDto in it.data) {
-                    gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
-                }
-                gifDAO.insertGifs(gifDataList)
-
+                postWebGifs(it)
             }, {
-                mIsLoadingState.postValue(false)
+                postCachedGifs(offset = offset, error = it)
             })
     }
 
-    fun removeGif(gifData: GifData) {
-        gifData.isRemoved = true
-        gifDAO.update(gifData)
+    private fun postWebGifs(it: ResponseDto) {
+        val gifDataList = mutableListOf<GifData>()
+        for (gifDataDto in it.data) {
+            gifDataList.add(GifDtoToGifDAOMapper.mapGifDTOToGifDAO(gifDataDto))
+        }
+        mResponseState.postValue(GifsResponseState.WebResponse(gifDataList.toList()))
+
+        Single.fromCallable { gifDAO.insertGifs(gifDataList) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
-    fun getGif(id: String): Single<GifData> {
-        return gifDAO.getGif(id)
+    private fun postCachedGifs(query: String = "", offset: Int, error: Throwable) {
+
+        Single.fromCallable { gifDAO.getGifs(query, offset) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { gifs ->
+                mResponseState.postValue(GifsResponseState.CacheResponse(gifs, error.message))
+            }
+
+    }
+
+    //TODO fix this don't work
+    fun removeGif(gifData: GifData) {
+        gifData.isRemoved = true
+        Single.fromCallable { gifDAO.update(gifData) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun clearDB() {
+        database.clearAllTables()
     }
 
 }

@@ -51,7 +51,7 @@ object DataModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): GiffyViewerDatabase =
         Room.databaseBuilder(context, GiffyViewerDatabase::class.java, "GiffyViewerDatabase")
-            .allowMainThreadQueries().build()
+            .build()
 
     @Provides
     @Singleton

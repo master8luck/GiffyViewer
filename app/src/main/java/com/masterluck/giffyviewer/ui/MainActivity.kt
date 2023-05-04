@@ -11,13 +11,18 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.bumptech.glide.Glide
 import com.masterluck.giffyviewer.R
 import com.masterluck.giffyviewer.databinding.ActivityMainBinding
+import com.masterluck.giffyviewer.repository.GiffyViewerRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var repository: GiffyViewerRepository
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -52,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     private fun clearCache() {
         lifecycleScope.launch(Dispatchers.IO) {
             Glide.get(applicationContext).clearDiskCache()
+            repository.clearDB()
         }
     }
 

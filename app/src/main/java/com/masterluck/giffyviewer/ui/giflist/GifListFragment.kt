@@ -17,6 +17,7 @@ import com.masterluck.giffyviewer.data.model.GifData
 import com.masterluck.giffyviewer.utils.Extensions.hideKeyboard
 import com.masterluck.giffyviewer.utils.Utils
 import com.masterluck.giffyviewer.databinding.FragmentGifListBinding
+import com.masterluck.giffyviewer.ui.viewmodel.GifsResponseState
 import com.masterluck.giffyviewer.ui.viewmodel.GifsViewModel
 import com.masterluck.giffyviewer.utils.Extensions.isInternetConnected
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,10 +54,19 @@ class GifListFragment : Fragment() {
             ivForward.setOnClickListener { showOtherPage(PageLoadingOrder.NEXT, tilEt.text.toString()) }
             til.setEndIconOnClickListener { showOtherPage(PageLoadingOrder.NEW, tilEt.text.toString()) }
 
-            viewModel.loadingState.observe(viewLifecycleOwner) { isLoading ->
-                binding.loadingRoot.isVisible = isLoading
-                if (isLoading)
-                    binding.tvNothingFound.isVisible = false
+            viewModel.responseState.observe(viewLifecycleOwner) { state ->
+                when (state) {
+                    is GifsResponseState.LoadingResponse -> {
+                        binding.loadingRoot.isVisible = true
+                        binding.tvNothingFound.isVisible = false
+                    }
+                    else -> {
+                        binding.loadingRoot.isVisible = false
+                        showGifs(state.gifs)
+
+                        binding.tvNothingFound.isVisible = state.gifs.isEmpty()
+                    }
+                }
             }
 
             // Hiding keyboard when search field not in focus
@@ -72,19 +82,13 @@ class GifListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.gifListLiveData.removeObservers(viewLifecycleOwner)
-        viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList ->
-            showGifs(gifList)
-        }
         binding.ivBack.isVisible = viewModel.offset > 0
         binding.rvGifList.scrollToPosition(viewModel.selectedGifPosition)
     }
 
     private fun showOtherPage(order: PageLoadingOrder, query: String) {
         context?.hideKeyboard(binding.tilEt)
-        viewModel.gifListLiveData.removeObservers(viewLifecycleOwner)
         viewModel.showOtherPage(order, query)
-        viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList -> showGifs(gifList) }
         binding.ivBack.isVisible = viewModel.offset > 0
     }
 

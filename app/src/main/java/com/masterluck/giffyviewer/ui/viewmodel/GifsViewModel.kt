@@ -1,5 +1,7 @@
 package com.masterluck.giffyviewer.ui.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.masterluck.giffyviewer.utils.Utils
 import com.masterluck.giffyviewer.data.model.GifData
@@ -14,12 +16,14 @@ class GifsViewModel @Inject constructor(
     private val repository: GiffyViewerRepository,
 ) : ViewModel() {
 
-    var gifListLiveData = repository.getGifs()
-        private set
+    init {
+        repository.getGifs()
+    }
+
+    val responseState = repository.responseState
 
     var offset = 0
         private set
-    val loadingState = repository.isLoadingState
 
     private var lastQuery = ""
     var selectedGifPosition = 0
@@ -35,10 +39,10 @@ class GifsViewModel @Inject constructor(
                 PageLoadingOrder.NEW -> offset = 0
                 PageLoadingOrder.NEXT -> offset += Utils.pageSize
             }
-            gifListLiveData = repository.getGifs(query, offset)
+            repository.getGifs(query, offset)
         } else {
             offset = 0
-            gifListLiveData = repository.getGifs(query, offset)
+            repository.getGifs(query, offset)
         }
         lastQuery = query
     }

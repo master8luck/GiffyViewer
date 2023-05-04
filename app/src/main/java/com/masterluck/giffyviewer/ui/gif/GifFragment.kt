@@ -5,11 +5,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.masterluck.giffyviewer.databinding.FragmentGifBinding
 import com.masterluck.giffyviewer.ui.giflist.PageLoadingOrder
+import com.masterluck.giffyviewer.ui.viewmodel.GifsResponseState
 import com.masterluck.giffyviewer.ui.viewmodel.GifsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,7 +40,14 @@ class GifFragment : Fragment() {
         binding.vp.setPageTransformer(MarginPageTransformer(200))
         setupBorderScroll(binding.vp)
 
-        viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList -> adapter.setupGifs(gifList) }
+        viewModel.responseState.observe(viewLifecycleOwner) { state ->
+            if (state is GifsResponseState.LoadingResponse) {
+
+            } else {
+                binding.vp.isVisible = true
+                adapter.setupGifs(state.gifs)
+            }
+        }
 
     }
 
@@ -88,9 +97,8 @@ class GifFragment : Fragment() {
         if (order == PageLoadingOrder.PREVIOUS && viewModel.offset == 0)
             return
 
-        viewModel.gifListLiveData.removeObservers(viewLifecycleOwner)
         viewModel.showOtherPage(order)
-        viewModel.gifListLiveData.observe(viewLifecycleOwner) { gifList -> adapter.setupGifs(gifList) }
+        binding.vp.isVisible = false
 
         if (order == PageLoadingOrder.NEXT)
             viewModel.selectedGifPosition = 0
